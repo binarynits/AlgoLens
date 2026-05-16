@@ -192,7 +192,10 @@ platform :ios do
       submit_for_review: ENV["SUBMIT_FOR_REVIEW"] == "1",
       automatic_release: false,                     # release manually after approval
       skip_screenshots: true,                       # add later via fastlane snapshot
-      skip_metadata: false,                         # reads from fastlane/metadata/
+      # Metadata upload via API key path hits a known deliver bug
+      # (review_attachment_file lookup returns no data on a fresh version).
+      # Set SKIP_METADATA=0 once that path is healthy (or use Apple ID auth).
+      skip_metadata: ENV["SKIP_METADATA"] != "0",
       precheck_include_in_app_purchases: false,
       submission_information: {
         add_id_info_uses_idfa: false,
