@@ -167,6 +167,10 @@ platform :ios do
       configuration: "Release",
       destination: "generic/platform=iOS",
       export_method: "app-store",
+      export_options: {
+        signingStyle: "automatic",
+        teamID: "QD98759DRZ"
+      },
       clean: true
     )
 
