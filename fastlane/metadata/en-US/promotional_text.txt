@@ -1,0 +1,1 @@
+Learn algorithm patterns through real-world stories and interactive visualizers. From sliding windows to graph BFS — see how each pattern actually works.

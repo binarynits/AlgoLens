@@ -6,15 +6,43 @@
 #   3. Run any lane:                        bundle exec fastlane <lane>
 #
 # Available lanes:
-#   bundle exec fastlane test          – run the unit + UI test bundles
-#   bundle exec fastlane build         – build a Release .app without signing (sanity check)
-#   bundle exec fastlane beta          – archive + upload to TestFlight (requires API key env vars)
+#   bundle exec fastlane test       – run the unit + UI test bundles
+#   bundle exec fastlane build      – build a Release .app without signing (sanity check)
+#   bundle exec fastlane beta       – archive + upload to TestFlight
+#   bundle exec fastlane release    – archive + upload to App Store Connect (does NOT submit
+#                                     for review by default — set SUBMIT_FOR_REVIEW=1 to submit)
+#
+# All upload lanes require these env vars (App Store Connect API key — preferred over Apple ID):
+#   APP_STORE_CONNECT_KEY_ID
+#   APP_STORE_CONNECT_ISSUER_ID
+#   APP_STORE_CONNECT_API_KEY_PATH
 
 default_platform(:ios)
 
 XCODE_PROJECT  = "AlgoLens.xcodeproj"
 SCHEME         = "AlgoLens"
 TEST_DEVICE    = "iPhone 17 Pro"
+
+# ---------------------------------------------------------------------------
+# Helpers
+
+def ensure_env!(*names)
+  missing = names.flatten.reject { |n| ENV[n] && !ENV[n].empty? }
+  return if missing.empty?
+  UI.user_error!("Missing required env vars: #{missing.join(', ')}. " \
+                 "See fastlane/Fastfile for the list.")
+end
+
+def asc_api_key
+  app_store_connect_api_key(
+    key_id:        ENV["APP_STORE_CONNECT_KEY_ID"],
+    issuer_id:     ENV["APP_STORE_CONNECT_ISSUER_ID"],
+    key_filepath:  ENV["APP_STORE_CONNECT_API_KEY_PATH"],
+    in_house:      false
+  )
+end
+
+# ---------------------------------------------------------------------------
 
 platform :ios do
   desc "Run unit and UI tests. Device overridable via FASTLANE_TEST_DEVICE env var."
@@ -40,30 +68,86 @@ platform :ios do
   end
 
   desc "Bump the build number, archive, and upload to TestFlight"
-  desc "Requires environment variables:"
-  desc "  APP_STORE_CONNECT_KEY_ID       – the key ID from App Store Connect"
-  desc "  APP_STORE_CONNECT_ISSUER_ID    – the issuer ID from App Store Connect"
-  desc "  APP_STORE_CONNECT_API_KEY_PATH – absolute path to your AuthKey_XXXX.p8 file"
   lane :beta do
-    api_key = app_store_connect_api_key(
-      key_id:        ENV["APP_STORE_CONNECT_KEY_ID"],
-      issuer_id:     ENV["APP_STORE_CONNECT_ISSUER_ID"],
-      key_filepath:  ENV["APP_STORE_CONNECT_API_KEY_PATH"],
-      in_house:      false
-    )
+    ensure_env!("APP_STORE_CONNECT_KEY_ID",
+                "APP_STORE_CONNECT_ISSUER_ID",
+                "APP_STORE_CONNECT_API_KEY_PATH")
 
+    api_key = asc_api_key
     increment_build_number(xcodeproj: XCODE_PROJECT)
 
     build_app(
       project: XCODE_PROJECT,
       scheme: SCHEME,
-      configuration: "Release"
+      configuration: "Release",
+      export_method: "app-store"
     )
 
     upload_to_testflight(
       api_key: api_key,
       skip_waiting_for_build_processing: true
     )
+  end
+
+  desc "Build a Release IPA and upload it to App Store Connect."
+  desc "By default this only uploads — it does not submit for review."
+  desc "Set SUBMIT_FOR_REVIEW=1 to submit immediately after upload."
+  desc "Set TAG_RELEASE=1 to commit the build-number bump, tag, and push."
+  lane :release do
+    ensure_env!("APP_STORE_CONNECT_KEY_ID",
+                "APP_STORE_CONNECT_ISSUER_ID",
+                "APP_STORE_CONNECT_API_KEY_PATH")
+
+    # Make sure we don't accidentally ship a dirty working tree.
+    ensure_git_status_clean
+
+    api_key = asc_api_key
+
+    # Bump the build number (CFBundleVersion). Marketing version (CFBundleShortVersionString)
+    # is left alone — bump that manually when you cut a new minor/major version.
+    increment_build_number(xcodeproj: XCODE_PROJECT)
+
+    build_app(
+      project: XCODE_PROJECT,
+      scheme: SCHEME,
+      configuration: "Release",
+      export_method: "app-store",
+      clean: true
+    )
+
+    # Run Apple's pre-submission checks (URLs, terminology, etc.) before uploading.
+    precheck(
+      api_key: api_key,
+      default_rule_level: :warn
+    )
+
+    upload_to_app_store(
+      api_key: api_key,
+      force: true,                                  # skip the "is this metadata correct?" prompt
+      submit_for_review: ENV["SUBMIT_FOR_REVIEW"] == "1",
+      automatic_release: false,                     # release manually after approval
+      skip_screenshots: true,                       # add later via fastlane snapshot
+      skip_metadata: false,                         # reads from fastlane/metadata/
+      precheck_include_in_app_purchases: false,
+      submission_information: {
+        add_id_info_uses_idfa: false,
+        export_compliance_uses_encryption: false
+      }
+    )
+
+    if ENV["TAG_RELEASE"] == "1"
+      version_number = get_version_number(xcodeproj: XCODE_PROJECT, target: SCHEME)
+      build_number   = get_build_number(xcodeproj: XCODE_PROJECT)
+      commit_version_bump(
+        xcodeproj: XCODE_PROJECT,
+        message: "Bump build to #{build_number}"
+      )
+      add_git_tag(tag: "v#{version_number}-build.#{build_number}")
+      push_to_git_remote
+    else
+      UI.message("Skipping git commit/tag/push. " \
+                 "Re-run with TAG_RELEASE=1 to enable it.")
+    end
   end
 
   # CI tip: when you move to a build server, swap `automatic` code signing

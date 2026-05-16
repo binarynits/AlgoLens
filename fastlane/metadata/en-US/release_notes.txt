@@ -1,0 +1,1 @@
+First release of AlgoLens. Eight algorithm pattern paths, story-driven lessons, interactive visualizers, and gamified practice puzzles with streaks and company-tagged filtering.

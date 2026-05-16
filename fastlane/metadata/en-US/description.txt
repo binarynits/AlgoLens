@@ -1,0 +1,36 @@
+AlgoLens teaches coding patterns the way they actually click — through real-world stories, interactive visualizers, and guided practice.
+
+Instead of memorizing abstract algorithms, see why and where each pattern is used in real software systems:
+• Fraud detection → Sliding Window
+• Duplicate payments → HashMap
+• Undo / Redo → Stack
+• Recently Played → Arrays
+• Friends of friends → Graph BFS
+• Calendar conflicts → Merge Intervals
+
+Eight pattern paths so far:
+• Arrays
+• HashMaps
+• Two Pointers
+• Sliding Window
+• Stack & Queue
+• Trees
+• Graph Basics
+• Merge Intervals
+
+Each lesson includes:
+• A real-world story that anchors the pattern in memory
+• An interactive visualizer — step through, play, watch the work happen
+• Guided practice problems with explanations
+• An interview-ready breakdown with time/space complexity, vs. brute force, and a Swift code sample in a syntax-highlighted editor
+
+Practice mode adds three coding game types:
+• Fill in the blanks — tap a token, drop it into the right slot
+• Sort the code — shuffled lines, tap two to swap them into order
+• Find the bug — read the function, tap the line that doesn't match the title
+
+Stack streaks, earn XP, and filter puzzles by the companies that ask similar questions in interviews — Google, Meta, Apple, Amazon, Microsoft.
+
+Built for mobile-first learning. iPhone-sized, dark code editor styling, short focused lessons designed for the in-between moments.
+
+Understand patterns visually. Remember them through stories. Apply them like real engineers.
