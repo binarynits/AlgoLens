@@ -179,9 +179,11 @@ platform :ios do
     )
 
     # Run Apple's pre-submission checks (URLs, terminology, etc.) before uploading.
+    # IAP check is skipped because the API-key code path doesn't support it (and we have no IAPs).
     precheck(
       api_key: api_key,
-      default_rule_level: :warn
+      default_rule_level: :warn,
+      include_in_app_purchases: false
     )
 
     upload_to_app_store(
