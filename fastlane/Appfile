@@ -1,0 +1,6 @@
+app_identifier("com.nitesh.algolens.AlgoLens")
+team_id("QD98759DRZ")
+
+# For App Store Connect (TestFlight / App Store) uploads, you also need either:
+#   apple_id("your-apple-id@example.com")
+# or an App Store Connect API key (preferred — used by the `beta` lane via env vars).
