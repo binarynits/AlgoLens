@@ -79,6 +79,22 @@ platform :ios do
     end
   end
 
+  desc "Upload screenshots from fastlane/screenshots/<locale>/ to App Store Connect."
+  desc "Tier (6.9\", 6.5\", etc.) is auto-detected from image dimensions."
+  lane :upload_screenshots do
+    ensure_env!("ASC_KEY_ID", "ASC_ISSUER_ID", "ASC_KEY_FILEPATH")
+    api_key = asc_api_key
+    upload_to_app_store(
+      api_key: api_key,
+      force: true,
+      skip_binary_upload: true,
+      skip_metadata: true,
+      skip_screenshots: false,
+      overwrite_screenshots: true,
+      precheck_include_in_app_purchases: false
+    )
+  end
+
   desc "Validate App Store Connect credentials with a read-only API call"
   lane :auth_check do
     ensure_env!("ASC_KEY_ID",
