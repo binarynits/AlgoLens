@@ -45,6 +45,39 @@ end
 # ---------------------------------------------------------------------------
 
 platform :ios do
+  desc "Create the AlgoLens app record in App Store Connect via the Connect API."
+  desc "Idempotent — re-running is safe (skips if the app already exists)."
+  lane :register_app do
+    ensure_env!("APP_STORE_CONNECT_KEY_ID",
+                "APP_STORE_CONNECT_ISSUER_ID",
+                "APP_STORE_CONNECT_API_KEY_PATH")
+
+    require "spaceship"
+
+    Spaceship::ConnectAPI.token = Spaceship::ConnectAPI::Token.create(
+      key_id:     ENV["APP_STORE_CONNECT_KEY_ID"],
+      issuer_id:  ENV["APP_STORE_CONNECT_ISSUER_ID"],
+      filepath:   File.expand_path(ENV["APP_STORE_CONNECT_API_KEY_PATH"])
+    )
+
+    bundle_id = "com.nitesh.algolens"
+    existing = Spaceship::ConnectAPI::App.find(bundle_id)
+    if existing
+      UI.success("App already exists in App Store Connect: id=#{existing.id}, name=#{existing.name}")
+    else
+      app = Spaceship::ConnectAPI::App.create(
+        name: "AlgoLens",
+        version_string: "1.0",
+        sku: "ALGOLENS001",
+        primary_locale: "en-US",
+        bundle_id: bundle_id,
+        platforms: ["IOS"],
+        company_name: nil
+      )
+      UI.success("Created App Store Connect record: id=#{app.id}, bundle_id=#{bundle_id}")
+    end
+  end
+
   desc "Validate App Store Connect credentials with a read-only API call"
   lane :auth_check do
     ensure_env!("APP_STORE_CONNECT_KEY_ID",

@@ -15,6 +15,16 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 
 ## iOS
 
+### ios register_app
+
+```sh
+[bundle exec] fastlane ios register_app
+```
+
+Create the AlgoLens app record in App Store Connect via the Connect API.
+
+Idempotent — re-running is safe (skips if the app already exists).
+
 ### ios auth_check
 
 ```sh
