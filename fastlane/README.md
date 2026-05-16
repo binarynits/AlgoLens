@@ -25,6 +25,16 @@ Create the AlgoLens app record in App Store Connect via the Connect API.
 
 Idempotent — re-running is safe (skips if the app already exists).
 
+### ios upload_screenshots
+
+```sh
+[bundle exec] fastlane ios upload_screenshots
+```
+
+Upload screenshots from fastlane/screenshots/<locale>/ to App Store Connect.
+
+Tier (6.9", 6.5", etc.) is auto-detected from image dimensions.
+
 ### ios auth_check
 
 ```sh
