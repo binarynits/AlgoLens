@@ -171,6 +171,10 @@ platform :ios do
         signingStyle: "automatic",
         teamID: "QD98759DRZ"
       },
+      # Lets xcodebuild fetch/create the distribution provisioning profile from Apple on the fly.
+      # Without this, automatic signing only knows about Development profiles.
+      xcargs: "-allowProvisioningUpdates",
+      export_xcargs: "-allowProvisioningUpdates",
       clean: true
     )
 
