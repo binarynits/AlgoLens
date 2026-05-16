@@ -165,6 +165,7 @@ platform :ios do
       project: XCODE_PROJECT,
       scheme: SCHEME,
       configuration: "Release",
+      destination: "generic/platform=iOS",
       export_method: "app-store",
       clean: true
     )
