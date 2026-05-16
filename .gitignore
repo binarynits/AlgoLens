@@ -19,7 +19,8 @@ Package.pins
 Package.resolved
 
 # Ruby / Bundler (for Fastlane)
-.bundle/
+# Note: .bundle/config is intentionally committed — it points Bundler at
+# vendor/bundle so first-time setup works without sudo on system Ruby.
 vendor/bundle/
 
 # Fastlane

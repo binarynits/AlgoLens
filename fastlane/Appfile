@@ -1,4 +1,4 @@
-app_identifier("com.nitesh.algolens.AlgoLens")
+app_identifier("com.nitesh.algolens")
 team_id("QD98759DRZ")
 
 # For App Store Connect (TestFlight / App Store) uploads, you also need either:
