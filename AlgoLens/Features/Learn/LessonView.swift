@@ -96,10 +96,13 @@ struct LessonView: View {
     }
 
     private func markComplete() {
-        if !progress.contains(where: { $0.lessonID == lesson.id }) {
+        if let existing = progress.first(where: { $0.lessonID == lesson.id }) {
+            // Refresh the date so today's replay counts toward the daily streak.
+            existing.completedAt = .now
+        } else {
             modelContext.insert(UserProgress(lessonID: lesson.id))
-            try? modelContext.save()
         }
+        try? modelContext.save()
     }
 }
 
